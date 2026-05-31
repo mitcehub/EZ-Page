@@ -1,9 +1,10 @@
-import { state, load, cfg, cfgSet, applyConfig, CONFIG_DEFAULTS, WALLPAPER_KEYS, getOrderedEngines, setEngineOrder, getRandomChineseSites } from './store.js';
+import { state, load, cfg, cfgSet, applyConfig, CONFIG_DEFAULTS, WALLPAPER_KEYS, getOrderedEngines, setEngineOrder, getRandomChineseSites, getMaxSiteCols } from './store.js';
 import { showToast, formatRangeLabel, refreshSettingsUI, refreshBgFitUI } from './utils.js';
 import { renderSites } from './sites.js';
 import { applyPreset, applySuite } from './presets.js';
 import { renderEngineDropdown } from './search.js';
 import { formatDate } from './clock.js';
+import { initPositions } from './main.js';
 
 export function initSettings() {
   var settingsBtn = document.getElementById('settings-btn');
@@ -68,6 +69,9 @@ export function initSettings() {
       var name = this.dataset.preset;
       applyPreset(group, name);
       applyConfig();
+      if (group === 'site') {
+        updateSiteColsSlider();
+      }
       refreshSettingsUI();
       renderSites();
       row.querySelectorAll('.preset-btn').forEach(function (b) { b.classList.remove('active'); });
@@ -82,6 +86,7 @@ export function initSettings() {
       var suiteName = this.dataset.suite;
       applySuite(suiteName);
       applyConfig();
+      updateSiteColsSlider();
       refreshSettingsUI();
       renderSites();
       showToast('套装已应用: ' + this.textContent);
@@ -125,11 +130,30 @@ export function initSettings() {
       }
       this.nextElementSibling.textContent = formatRangeLabel(key, actualVal, unit);
       applyConfig();
-      if (key.indexOf('site_') === 0 || key === 'search_site_gap') {
+      if (key.indexOf('site_') === 0) {
         renderSites();
+      }
+      if (key === 'site_size' || key === 'site_gap_x') {
+        updateSiteColsSlider();
       }
     });
   });
+
+  function updateSiteColsSlider() {
+    var slider = document.querySelector('input[data-key="site_cols"]');
+    if (!slider) return;
+    var maxCols = getMaxSiteCols();
+    slider.max = maxCols;
+    var currentVal = parseInt(cfg('site_cols')) || 0;
+    if (currentVal > maxCols) {
+      cfgSet('site_cols', maxCols.toString());
+      slider.value = maxCols;
+      slider.nextElementSibling.textContent = formatRangeLabel('site_cols', maxCols.toString(), '');
+      applyConfig();
+      renderSites();
+    }
+  }
+  updateSiteColsSlider();
 
 
   document.querySelectorAll('select[data-key], input[data-key][list]').forEach(function (el) {
@@ -192,9 +216,7 @@ export function initSettings() {
 
     var root = document.documentElement;
     var savedFont = cfg('clock_font');
-    if (savedFont) {
-      preview.textContent = savedFont;
-    }
+    preview.textContent = savedFont || '默认';
 
     function open() {
       trigger.classList.add('open');
@@ -389,6 +411,7 @@ export function initSettings() {
 
   resetProceedBtn.addEventListener('click', function () {
     closeResetModal();
+    document.getElementById('main-wrap').classList.remove('abs-pos');
     Object.keys(CONFIG_DEFAULTS).forEach(function (k) {
       if (WALLPAPER_KEYS.indexOf(k) !== -1) return;
       localStorage.removeItem('mh_cfg_' + k);
@@ -401,6 +424,7 @@ export function initSettings() {
     localStorage.setItem('mh_sites', JSON.stringify(state.sites));
     applyConfig();
     renderSites();
+    initPositions();
     refreshSettingsUI();
     renderEngineDropdown();
     initEngineSort();

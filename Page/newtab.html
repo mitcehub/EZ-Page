@@ -100,7 +100,7 @@
           </div>
           <div class="settings-entry-text">
             <span class="settings-entry-title">时钟设置</span>
-            <span class="settings-entry-desc">显示、格式、字号、偏移</span>
+            <span class="settings-entry-desc">显示、格式、字号、位置</span>
           </div>
           <svg class="settings-entry-arrow" viewBox="0 0 24 24" width="16" height="16">
             <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" fill="currentColor" />
@@ -116,7 +116,7 @@
           </div>
           <div class="settings-entry-text">
             <span class="settings-entry-title">搜索框设置</span>
-            <span class="settings-entry-desc">宽度、高度、圆角、透明度</span>
+            <span class="settings-entry-desc">宽度、高度、圆角、透明度、位置</span>
           </div>
           <svg class="settings-entry-arrow" viewBox="0 0 24 24" width="16" height="16">
             <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" fill="currentColor" />
@@ -132,7 +132,7 @@
           </div>
           <div class="settings-entry-text">
             <span class="settings-entry-title">图标设置</span>
-            <span class="settings-entry-desc">大小、圆角、间距、显示名称</span>
+            <span class="settings-entry-desc">大小、圆角、间距、名称、位置</span>
           </div>
           <svg class="settings-entry-arrow" viewBox="0 0 24 24" width="16" height="16">
             <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" fill="currentColor" />
@@ -225,9 +225,9 @@
             </select>
           </div>
           <div class="settings-item">
-            <label>垂直偏移</label>
-            <input type="range" data-key="clock_offset" data-min="-150" data-max="150" data-unit="px" data-default="0">
-            <span class="range-value">0px</span>
+            <label>垂直位置</label>
+            <input type="range" data-key="clock_pos" data-min="0" data-max="100" data-unit="%" data-default="0">
+            <span class="range-value">0%</span>
           </div>
         </div>
       </div>
@@ -245,6 +245,12 @@
               <button class="preset-btn" data-preset="spotlight">聚光</button>
               <button class="preset-btn" data-preset="glowborder">流光</button>
               <button class="preset-btn" data-preset="acrylic">亚克力</button>
+            </div>
+          </div>
+          <div class="settings-item">
+            <label>显示搜索框</label>
+            <div class="toggle-switch" data-key="search_show" data-default="1">
+              <div class="toggle-circular"></div>
             </div>
           </div>
           <div class="settings-item">
@@ -269,9 +275,9 @@
             <span class="range-value">12%</span>
           </div>
           <div class="settings-item">
-            <label>垂直偏移</label>
-            <input type="range" data-key="search_offset" data-min="-150" data-max="150" data-unit="px" data-default="0">
-            <span class="range-value">0px</span>
+            <label>垂直位置</label>
+            <input type="range" data-key="search_pos" data-min="0" data-max="100" data-unit="%" data-default="0">
+            <span class="range-value">0%</span>
           </div>
           <div class="settings-divider"></div>
           <div class="settings-item vertical">
@@ -297,8 +303,14 @@
             </div>
           </div>
           <div class="settings-item">
+            <label>显示图标</label>
+            <div class="toggle-switch" data-key="sites_show" data-default="1">
+              <div class="toggle-circular"></div>
+            </div>
+          </div>
+          <div class="settings-item">
             <label>每行数量</label>
-            <input type="range" data-key="site_cols" data-min="0" data-max="15" data-unit="" data-default="0">
+            <input type="range" data-key="site_cols" data-min="0" data-unit="" data-default="0">
             <span class="range-value">自动</span>
           </div>
           <div class="settings-item">
@@ -317,15 +329,19 @@
             <span class="range-value">100%</span>
           </div>
           <div class="settings-item">
-            <label>图标间距</label>
-            <input type="range" data-key="site_gap" data-min="8" data-max="36" data-unit="px" data-default="30">
+            <label>水平间距</label>
+            <input type="range" data-key="site_gap_x" data-min="6" data-max="60" data-unit="px" data-default="30">
             <span class="range-value">30px</span>
           </div>
           <div class="settings-item">
-            <label>搜索与图标间距</label>
-            <input type="range" data-key="search_site_gap" data-min="20" data-max="160" data-unit="px"
-              data-default="60">
-            <span class="range-value">60px</span>
+            <label>垂直间距</label>
+            <input type="range" data-key="site_gap_y" data-min="4" data-max="40" data-unit="px" data-default="30">
+            <span class="range-value">30px</span>
+          </div>
+          <div class="settings-item">
+            <label>垂直位置</label>
+            <input type="range" data-key="sites_pos" data-min="0" data-max="100" data-unit="%" data-default="0">
+            <span class="range-value">0%</span>
           </div>
           <div class="settings-item">
             <label>显示名称</label>

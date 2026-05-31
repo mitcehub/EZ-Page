@@ -72,9 +72,11 @@ function shuffle(arr) {
 
 export function getRandomChineseSites() {
   var siteSize = parseInt(cfg('site_size')) || 60;
-  var siteGap = parseInt(cfg('site_gap')) || 30;
-  var availableWidth = window.innerWidth;
-  var itemTotalWidth = siteSize + siteGap;
+  var siteGap = parseInt(cfg('site_gap_x')) || 30;
+  var style = cfg('site_style');
+  var hpad = (['squircle', '3d', 'hoverglow', 'neumorphic'].indexOf(style) !== -1) ? 4 : 0;
+  var availableWidth = window.innerWidth - 40;
+  var itemTotalWidth = siteSize + hpad * 2 + siteGap;
   var cols = Math.floor(availableWidth / itemTotalWidth);
   cols = Math.max(5, cols);
   var maxRows = Math.floor((window.innerHeight * 0.4) / (siteSize + 22 + siteGap));
@@ -123,20 +125,18 @@ export var DEFAULT_BG = 'https://www.bing.com/th?id=OHR.SichuanTea_ZH-CN67034378
 export var WALLPAPER_KEYS = ['mask_opacity', 'bg_blur', 'bg_fit'];
 
 export var CONFIG_DEFAULTS = {
-  clock_show: '1', clock_24h: '1', clock_seconds: '0', clock_fontsize: '72', clock_date_fontsize: '16', clock_date_format: 'MD', clock_date_weight: '400', clock_font: '', clock_offset: '0', clock_style: 'classic',
-  search_width: '680', search_height: '46', search_radius: '24', search_opacity: '12', search_offset: '0', search_style: 'pill',
-  search_site_gap: '60',
-  site_cols: '0', site_size: '60', site_radius: '27', site_opacity: '100', site_gap: '30',
+  clock_show: '1', clock_24h: '1', clock_seconds: '0', clock_fontsize: '72', clock_date_fontsize: '16', clock_date_format: 'MD', clock_date_weight: '400', clock_font: '', clock_pos: '0', clock_style: 'classic',
+  search_show: '1', search_width: '680', search_height: '46', search_radius: '24', search_opacity: '12', search_pos: '0', search_style: 'pill',
+  sites_show: '1', site_cols: '0', site_size: '60', site_radius: '27', site_opacity: '100', site_gap_x: '30', site_gap_y: '30', sites_pos: '0',
   site_showname: '1', site_newtab: '1', site_style: 'round',
   mask_opacity: '30', bg_blur: '0', bg_fit: 'cover',
   wp_autorotate: '0', wp_autorotate_source: 'bing'
 };
 
 export var CONFIG_BOUNDS = {
-  clock_fontsize: [32, 120], clock_date_fontsize: [12, 30], clock_offset: [-150, 150],
-  search_width: [400, 1000], search_height: [36, 56], search_radius: [0, 28], search_opacity: [5, 80], search_offset: [-150, 150],
-  search_site_gap: [20, 160],
-  site_cols: [0, 15], site_size: [36, 72], site_radius: [0, 50], site_opacity: [20, 100], site_gap: [8, 36],
+  clock_fontsize: [32, 120], clock_date_fontsize: [12, 30], clock_pos: [0, 100],
+  search_width: [400, 1000], search_height: [36, 56], search_radius: [0, 28], search_opacity: [5, 80], search_pos: [0, 100],
+  site_cols: [0, 99], site_size: [36, 72], site_radius: [0, 50], site_opacity: [20, 100], site_gap_x: [6, 60], site_gap_y: [4, 40], sites_pos: [0, 100],
   mask_opacity: [0, 80], bg_blur: [0, 20]
 };
 
@@ -157,9 +157,20 @@ export function clamp(val, key) {
   var n = parseInt(val) || 0;
   if (key === 'site_cols') {
     if (n === 0) return '0';
-    return Math.max(5, Math.min(15, n)).toString();
+    var maxCols = getMaxSiteCols();
+    return Math.max(5, Math.min(maxCols, n)).toString();
   }
   return Math.max(b[0], Math.min(b[1], n)).toString();
+}
+
+export function getMaxSiteCols() {
+  var availW = window.innerWidth - 40;
+  var siteSize = parseInt(cfg('site_size')) || 60;
+  var siteGapX = parseInt(cfg('site_gap_x')) || 30;
+  var style = cfg('site_style');
+  var hpad = (['squircle', '3d', 'hoverglow', 'neumorphic'].indexOf(style) !== -1) ? 4 : 0;
+  var itemW = siteSize + hpad * 2 + siteGapX;
+  return Math.max(5, Math.floor(availW / itemW));
 }
 
 export function cfg(key) {
@@ -192,15 +203,17 @@ export function applyConfig() {
   var root = document.documentElement.style;
   var clockWrap = document.getElementById('clock-wrap');
   var searchWrap = document.getElementById('search-wrap');
+  var siteWrap = document.getElementById('site-wrap');
   var siteGrid = document.getElementById('site-grid');
 
   clockWrap.classList.toggle('hidden', cfg('clock_show') !== '1');
+  searchWrap.classList.toggle('hidden', cfg('search_show') !== '1');
+  siteWrap.classList.toggle('hidden', cfg('sites_show') !== '1');
 
   root.setProperty('--clock-fontsize', cfg('clock_fontsize') + 'px');
   root.setProperty('--clock-date-fontsize', cfg('clock_date_fontsize') + 'px');
   root.setProperty('--clock-date-weight', cfg('clock_date_weight'));
   root.setProperty('--clock-font', cfg('clock_font') || 'inherit');
-  root.setProperty('--clock-offset', cfg('clock_offset') + 'px');
 
   var clockStyles = ['classic', 'glow', 'outline', 'shadow', 'gradient', 'hologram', 'lcd', 'neon'];
   clockStyles.forEach(function (s) { clockWrap.classList.remove('clock-' + s); });
@@ -210,8 +223,6 @@ export function applyConfig() {
   root.setProperty('--search-height', cfg('search_height') + 'px');
   root.setProperty('--search-radius', cfg('search_radius') + 'px');
   root.setProperty('--search-opacity', (parseInt(cfg('search_opacity')) / 100).toString());
-  root.setProperty('--search-offset', cfg('search_offset') + 'px');
-  root.setProperty('--search-site-gap', cfg('search_site_gap') + 'px');
 
   var searchStyles = ['pill', 'glass', 'border', 'minimal', 'neumorphism', 'spotlight', 'glowborder', 'acrylic'];
   searchStyles.forEach(function (s) { searchWrap.classList.remove('search-' + s); });
@@ -229,7 +240,8 @@ export function applyConfig() {
   root.setProperty('--site-size', cfg('site_size') + 'px');
   root.setProperty('--site-radius', cfg('site_radius') + '%');
   root.setProperty('--site-opacity', (parseInt(cfg('site_opacity')) / 100).toString());
-  root.setProperty('--site-gap', cfg('site_gap') + 'px');
+  root.setProperty('--site-gap-x', cfg('site_gap_x') + 'px');
+  root.setProperty('--site-gap-y', cfg('site_gap_y') + 'px');
   root.setProperty('--site-icon-img', Math.round(parseInt(cfg('site_size')) * 0.58) + 'px');
 
   var siteStyles = ['round', 'card', 'outline', 'minimal', 'squircle', '3d', 'hoverglow', 'neumorphic'];
@@ -257,5 +269,50 @@ export function applyConfig() {
     bgWrap.style.backgroundSize = 'auto';
     bgWrap.style.backgroundRepeat = 'repeat';
     bgWrap.style.backgroundPosition = 'top left';
+  }
+
+  if (document.getElementById('main-wrap').classList.contains('abs-pos')) {
+    updatePositions();
+  }
+}
+
+export function updatePositions() {
+  var viewportH = window.innerHeight;
+  var root = document.documentElement.style;
+
+  var clockWrap = document.getElementById('clock-wrap');
+  if (!clockWrap.classList.contains('hidden')) {
+    var clockH = clockWrap.getBoundingClientRect().height;
+    if (clockH > 0) {
+      var clockMinY = clockH / 2;
+      var clockMaxY = viewportH - clockH / 2;
+      var clockPct = parseInt(cfg('clock_pos')) || 0;
+      var clockY = clockMinY + (clockMaxY - clockMinY) * clockPct / 100;
+      root.setProperty('--clock-y', Math.round(clockY) + 'px');
+    }
+  }
+
+  var searchWrap = document.getElementById('search-wrap');
+  if (!searchWrap.classList.contains('hidden')) {
+    var searchH = searchWrap.getBoundingClientRect().height;
+    if (searchH > 0) {
+      var searchMinY = searchH / 2;
+      var searchMaxY = viewportH - searchH / 2;
+      var searchPct = parseInt(cfg('search_pos')) || 0;
+      var searchY = searchMinY + (searchMaxY - searchMinY) * searchPct / 100;
+      root.setProperty('--search-y', Math.round(searchY) + 'px');
+    }
+  }
+
+  var siteWrap = document.getElementById('site-wrap');
+  if (!siteWrap.classList.contains('hidden')) {
+    var siteH = siteWrap.getBoundingClientRect().height;
+    if (siteH > 0) {
+      var siteMinY = siteH / 2;
+      var siteMaxY = viewportH - siteH / 2;
+      var sitePct = parseInt(cfg('sites_pos')) || 0;
+      var siteY = siteMinY + (siteMaxY - siteMinY) * sitePct / 100;
+      root.setProperty('--sites-y', Math.round(siteY) + 'px');
+    }
   }
 }

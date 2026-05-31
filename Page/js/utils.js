@@ -12,6 +12,28 @@ export function formatRangeLabel(key, val, unit) {
     if (val === '0') return '自动';
     return val + '个';
   }
+  if (key === 'clock_pos' || key === 'search_pos' || key === 'sites_pos') {
+    var viewportH = window.innerHeight;
+    var pct = parseInt(val) || 0;
+    var elem = null;
+    var h = 0;
+    if (key === 'clock_pos') {
+      elem = document.getElementById('clock-wrap');
+    } else if (key === 'search_pos') {
+      elem = document.getElementById('search-wrap');
+    } else if (key === 'sites_pos') {
+      elem = document.getElementById('site-wrap');
+    }
+    if (elem && !elem.classList.contains('hidden')) {
+      h = elem.getBoundingClientRect().height;
+    }
+    if (h > 0) {
+      var minY = h / 2;
+      var maxY = viewportH - h / 2;
+      var actualY = Math.round(minY + (maxY - minY) * pct / 100);
+      return pct + '% (' + actualY + 'px)';
+    }
+  }
   if (unit) return val + unit;
   return val;
 }
